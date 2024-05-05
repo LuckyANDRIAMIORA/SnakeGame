@@ -1,26 +1,25 @@
-const gameBoard = document.getElementById('gameBoard')
-const messages = document.getElementById('messages')
+const gameBoard = document.getElementById('gameBoard');
+let foodNumber = 1;
+let foodLocations = [];
 let direction = 1; 
 let lastPosition = []
 let position = [1,0]
 let snake = null
 let lastKeyPressTime = 0
 const debounceDelay = 100
-let foodNumber = 1
-let foodLocations = []
 
 async function initGameBoard() {
-    gameBoard.replaceChildren('')
+    gameBoard.replaceChildren('');
     for (let index = 0; index < 1600; index++) {
         const cell = document.createElement('div');
-        cell.classList.add('cell')
-        gameBoard.appendChild(cell)
+        cell.classList.add('cell');
+        gameBoard.appendChild(cell);
     }
 
 }
 
 function getAllCells() {
-    const cells = gameBoard.getElementsByClassName('cell')
+    const cells = gameBoard.getElementsByClassName('cell');
     return cells;
 }
 
@@ -52,15 +51,6 @@ function moveSnake() {
 
 }
 
-function generateFood(){
-    const cells = getAllCells()
-    for (let index = 0; index < foodNumber; index++) {
-        const foodLocation = Math.round(Math.random() * 1600)
-        foodLocations.push(foodLocation) 
-        cells[foodLocation].classList.add('food')
-    }
-}
-
 function killSnake(p){
     const cells = getAllCells()
     if(p >= cells.length || p < 0){
@@ -74,6 +64,15 @@ function killSnake(p){
 function erraseSnake(p) {
     let cells = getAllCells()
     cells[p].classList.remove('snake')
+}
+
+function generateFood() {
+    const cells = getAllCells();
+    for (let index = 0; index < foodNumber; index++) {
+        const foodLocation = Math.round(Math.random() * 1600);
+        foodLocations.push(foodLocation);
+        cells[foodLocation].classList.add('food');
+    }
 }
 
 function erraseFood(f) {
