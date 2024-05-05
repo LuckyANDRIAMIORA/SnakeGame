@@ -1,18 +1,35 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>snake game</title>
-        <meta charset="UTF-8">
-        <meta name="description" content="snake game">
-        <meta name="author" content="Ainamalala Lucky">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">    
-        <link rel="stylesheet" href="./css/gameBoard.css">
-        <link rel="stylesheet" href="./css/index.css">
-    </head>
-    <body>
-        <div class="container">
-            <div id="gameBoard"></div>
+
+<head>
+    <title>snake game</title>
+    <meta charset="UTF-8">
+    <meta name="description" content="snake game">
+    <meta name="author" content="Ainamalala Lucky">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/gameBoard.css">
+    <link rel="stylesheet" href="./css/index.css">
+</head>
+
+<body>
+    <div class="container">
+        <div id="gameBoard"></div>
+        <div class="controler">
+            <div class="select-start">
+                <button> select </button>
+                <button> start </button>
+            </div>
+            <div class="directions">
+                <button> up </button>
+                <div style="display: flex;">
+                    <button> left </button>
+                    <button> down </button>
+                    <button> right </button>
+                </div>
+            </div>
         </div>
-    </body>
-    <script src="./js/snakeGame.js"></script>
+    </div>
+</body>
+<script src="./js/snakeGame.js"></script>
+
 </html>
