@@ -1,96 +1,127 @@
-const gameBoard = document.getElementById('gameBoard')
+const board = document.getElementById('gameBoard');
+const boardSize = 1600;
+const gameBoard = new GameBoard(board, boardSize)
+
+let snake
+
+let snakeMotion = null
 let direction = 1;
-let newStep = false
-let lastMoves = undefined
-let lastPosition = []
-let position = [2,1,0]
+let lastTime = 0;
+const speed = 50;
 
-
-async function initGameBoard() {
-    gameBoard.replaceChildren('')
-    for (let index = 0; index < 1600; index++) {
-        const cell = document.createElement('div');
-        cell.classList.add('cell')
-        gameBoard.appendChild(cell)
+function initSnake() {
+    for (let index = 0; index < snake.bodyLength(); index++) {
+        gameBoard.drawSnakePart(snake.getIndex(index));
     }
-
 }
 
-function getAllCells() {
-    const cells = gameBoard.getElementsByClassName('cell')
-    return cells;
-}
-
-function moveSnake() {
-    for (let index = 0; index < position.length; index++) {
-
-        position[index] = moveCell(position[index], position[0], index)
-
+function killSnake() {
+    if (snake.getIndex(0) >= gameBoard.getCellsLength() || snake.getIndex(0) < 0) {
+        throw new Error('Game Over!')
     }
-
+    if (snake.biteItself()) {
+        throw new Error('Game Over!')
+    }
 }
 
-function moveCell(p, head, index) {
-    let cells = getAllCells()
-    lastPosition.push(position[index])
-    if (p < cells.length) {
-        if(newStep){
-            cells[lastMoves].classList.remove('snake')
-            newStep = false
+function moveSnake(timestamp) {
+    try {
+        if (!lastTime) lastTime = timestamp;
+        const deltaTime = timestamp - lastTime;
+        if (deltaTime > speed) {
+            killSnake()
+            const hasEaten = foodEaten()
+            if (!hasEaten) {
+                gameBoard.erraseSnakePart(snake.getIndex(snake.bodyLength() - 1));
+                snake.removeSnakeTail();
+            }
+            const newHead = snake.getIndex(0) + direction;
+            snake.addNewSnakeHead(newHead);
+            gameBoard.drawSnakePart(snake.getIndex(0))
+            lastTime = timestamp;
         }
-        lastMoves = p
-        cells[p].classList.add('snake')
-        if (p == head) {
-            p = p + direction
-        } else {
-            p = lastPosition[index - 1]
-        }
+        requestAnimationFrame(moveSnake)
+    } catch (error) {
+        stop()
+        console.log('Game Over')
     }
-    if (lastPosition.length == 3) {
-        lastPosition = []
-        newStep = true
+
+}
+
+function foodEaten() {
+    if (gameBoard.getFoodIndex(snake.getIndex(0)) != -1) {
+        let index = gameBoard.getFoodIndex(snake.getIndex(0))
+        gameBoard.erraseFood(snake.getIndex(0))
+        gameBoard.removeFood(index);
+        gameBoard.generateFood()
+        return true
+    } else {
+        return false
     }
-    return p
 }
 
-function goDown(){
-
-    direction = 40
-
+function generateFood() {
+    gameBoard.generateFood()
 }
 
-function goUp(){
+async function initGame() {
+    gameBoard.initGameBoard()
+    snake = new Snake(0, 1)
+    initSnake()
+    generateFood()
 
-    direction = -40
-
+    snakeMotion = requestAnimationFrame(moveSnake,)
 }
 
-function goLeft(){
-    
-    direction = -1
+function restart() {
+    stop();
 
-}
-
-function goRight(){
-    
     direction = 1
+    for (let index = 0; index < snake.bodyLength(); index++) {
+        gameBoard.erraseSnakePart(snake.getIndex(index))
+    }
+    gameBoard.removeAllFood()
+    snake = new Snake(0, 1)
+    initSnake()
+    generateFood()
+    snakeMotion = requestAnimationFrame(moveSnake,)
 
 }
 
-document.addEventListener('keydown',(e)=>{
-    if(e.key === 'ArrowDown'){
-        if(direction != -40) goDown()
+async function stop() {
+    cancelAnimationFrame(snakeMotion)
+}
+
+function goDown() {
+    direction = 40
+}
+
+function goUp() {
+    direction = -40
+}
+
+function goLeft() {
+    direction = -1
+}
+
+function goRight() {
+    direction = 1
+}
+
+document.addEventListener('keyup', (e) => {
+
+    if (e.key === 'ArrowDown' && direction != -40) {
+        goDown()
     }
-    if(e.key === 'ArrowUp'){
-        if(direction != 40) goUp()
+    if (e.key === 'ArrowUp' && direction != 40) {
+        goUp()
     }
-    if(e.key === 'ArrowRight'){
-        if(direction != -1) goRight()
+    if (e.key === 'ArrowRight' && direction != -1) {
+        goRight()
     }
-    if(e.key === 'ArrowLeft'){
-        if(direction != 1) goLeft()
+    if (e.key === 'ArrowLeft' && direction != 1) {
+        goLeft()
     }
 })
 
-initGameBoard()
-setInterval(moveSnake, 300)
+initGame()

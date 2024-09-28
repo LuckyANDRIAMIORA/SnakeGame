@@ -2,14 +2,18 @@
     display: grid;
     grid-template-columns: repeat(40,10px);
     grid-template-rows: repeat(40,10px);
+    background-color: black;
 }
 
 .cell{
     width: 10px;
     height: 10px;
-    border: 1px solid gray;
 }
 
 .snake{
-    background-color: chartreuse
+    background-color: lightseagreen
+}
+
+.food{
+    background-color: yellow;
 }
