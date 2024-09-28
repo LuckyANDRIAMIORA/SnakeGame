@@ -1,30 +1,38 @@
-body, html{
+body,
+html {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     padding: 0;
     margin: 0;
+    min-width: max-content;
 }
-.container{
+
+.container {
     display: flex;
-    height: 100vh;
+    flex-wrap: wrap;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    min-height: 100vh;
 }
-.select-start{
+
+.restart {
     display: flex;
     margin: 5px;
     justify-content: center;
     align-items: center;
-}
-
-.select-start button{
     margin-left: 2px;
     margin-right: 2px;
+    flex: 1;
 }
 
-.directions{
+.controler {
     display: flex;
-    margin: 5px;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
     justify-content: center;
-    align-items: center;
+    flex: 1;
 }

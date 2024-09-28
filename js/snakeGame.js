@@ -1,156 +1,127 @@
-const gameBoard = document.getElementById('gameBoard');
-let foodNumber = 1;
-let foodLocations = [];
-let direction = 1; 
-let lastPosition = []
-let position = [1,0]
-let snake = null
-let lastKeyPressTime = 0
-const debounceDelay = 100
+const board = document.getElementById('gameBoard');
+const boardSize = 1600;
+const gameBoard = new GameBoard(board, boardSize)
 
-async function initGameBoard() {
-    gameBoard.replaceChildren('');
-    for (let index = 0; index < 1600; index++) {
-        const cell = document.createElement('div');
-        cell.classList.add('cell');
-        gameBoard.appendChild(cell);
+let snake
+
+let snakeMotion = null
+let direction = 1;
+let lastTime = 0;
+const speed = 50;
+
+function initSnake() {
+    for (let index = 0; index < snake.bodyLength(); index++) {
+        gameBoard.drawSnakePart(snake.getIndex(index));
     }
-
 }
 
-function getAllCells() {
-    const cells = gameBoard.getElementsByClassName('cell');
-    return cells;
+function killSnake() {
+    if (snake.getIndex(0) >= gameBoard.getCellsLength() || snake.getIndex(0) < 0) {
+        throw new Error('Game Over!')
+    }
+    if (snake.biteItself()) {
+        throw new Error('Game Over!')
+    }
 }
 
-function moveSnake() {
+function moveSnake(timestamp) {
     try {
-
-        killSnake(position[0])
-        eatFood(position[0])
-
-        for (let index = 0; index < lastPosition.length; index++) {
-
-            erraseSnake(lastPosition[index])
-
+        if (!lastTime) lastTime = timestamp;
+        const deltaTime = timestamp - lastTime;
+        if (deltaTime > speed) {
+            killSnake()
+            const hasEaten = foodEaten()
+            if (!hasEaten) {
+                gameBoard.erraseSnakePart(snake.getIndex(snake.bodyLength() - 1));
+                snake.removeSnakeTail();
+            }
+            const newHead = snake.getIndex(0) + direction;
+            snake.addNewSnakeHead(newHead);
+            gameBoard.drawSnakePart(snake.getIndex(0))
+            lastTime = timestamp;
         }
-
-        lastPosition = []
-
-        for (let index = 0; index < position.length; index++) {
-
-            position[index] = drawSnake(position[index], position[0], index)
-
-        }
+        requestAnimationFrame(moveSnake)
     } catch (error) {
-        clearInterval(snake)
-        const cell = document.createElement('alert')
-        cell.textContent = "Game Over!"
-        messages.appendChild(cell)
+        stop()
+        console.log('Game Over')
     }
 
 }
 
-function killSnake(p){
-    const cells = getAllCells()
-    if(p >= cells.length || p < 0){
-        throw new Error('Game Over!')
-    } 
-    if(position.lastIndexOf(p) != -1 && position.lastIndexOf(p) != 0){        
-        throw new Error('Game Over!')
+function foodEaten() {
+    if (gameBoard.getFoodIndex(snake.getIndex(0)) != -1) {
+        let index = gameBoard.getFoodIndex(snake.getIndex(0))
+        gameBoard.erraseFood(snake.getIndex(0))
+        gameBoard.removeFood(index);
+        gameBoard.generateFood()
+        return true
+    } else {
+        return false
     }
-}
-
-function erraseSnake(p) {
-    let cells = getAllCells()
-    cells[p].classList.remove('snake')
 }
 
 function generateFood() {
-    const cells = getAllCells();
-    for (let index = 0; index < foodNumber; index++) {
-        const foodLocation = Math.round(Math.random() * 1600);
-        foodLocations.push(foodLocation);
-        cells[foodLocation].classList.add('food');
-    }
+    gameBoard.generateFood()
 }
 
-function erraseFood(f) {
-    let cells = getAllCells()
-    cells[f].classList.remove('food')
-}
-
-function drawSnake(p, head, index) {
-    let cells = getAllCells()
-    lastPosition.push(position[index])
-    if (p < cells.length) {
-        cells[p].classList.add('snake')
-        if (p == head) {
-            p = p + direction
-        } else {
-            p = lastPosition[index - 1]
-        }
-    }
-    return p
-}
-
-function eatFood(p){
-    if(foodLocations.indexOf(p) != -1){
-        let index = foodLocations.indexOf(p)
-        erraseFood(foodLocations[index])
-        delete foodLocations[index]
-        position.push(p)
-        generateFood()
-    }
-}
-
-function start() {
+async function initGame() {
+    gameBoard.initGameBoard()
+    snake = new Snake(0, 1)
+    initSnake()
     generateFood()
-    snake = setInterval(moveSnake, 150)//moveng the snake with 200ms speed
+
+    snakeMotion = requestAnimationFrame(moveSnake,)
 }
 
-initGameBoard()
-start()
+function restart() {
+    stop();
+
+    direction = 1
+    for (let index = 0; index < snake.bodyLength(); index++) {
+        gameBoard.erraseSnakePart(snake.getIndex(index))
+    }
+    gameBoard.removeAllFood()
+    snake = new Snake(0, 1)
+    initSnake()
+    generateFood()
+    snakeMotion = requestAnimationFrame(moveSnake,)
+
+}
+
+async function stop() {
+    cancelAnimationFrame(snakeMotion)
+}
 
 function goDown() {
-
     direction = 40
-
 }
 
 function goUp() {
-
     direction = -40
-
 }
 
 function goLeft() {
-
     direction = -1
-
 }
 
 function goRight() {
-
     direction = 1
-
 }
 
 document.addEventListener('keyup', (e) => {
-    const currentTime = Date.now()
-    if (currentTime - lastKeyPressTime > debounceDelay) {
-        lastKeyPressTime = currentTime
-        if (e.key === 'ArrowDown') {
-            if (direction != -40) goDown()
-        }
-        if (e.key === 'ArrowUp') {
-            if (direction != 40) goUp()
-        }
-        if (e.key === 'ArrowRight') {
-            if (direction != -1) goRight()
-        }
-        if (e.key === 'ArrowLeft') {
-            if (direction != 1) goLeft()
-        }
+
+    if (e.key === 'ArrowDown' && direction != -40) {
+        goDown()
+    }
+    if (e.key === 'ArrowUp' && direction != 40) {
+        goUp()
+    }
+    if (e.key === 'ArrowRight' && direction != -1) {
+        goRight()
+    }
+    if (e.key === 'ArrowLeft' && direction != 1) {
+        goLeft()
     }
 })
+
+initGame()

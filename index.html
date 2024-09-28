@@ -13,23 +13,19 @@
 
 <body>
     <div class="container">
+        <div>
+            <h1>Snake Game</h1>
+        </div>
         <div id="gameBoard"></div>
         <div class="controler">
-            <div class="select-start">
-                <button> select </button>
-                <button> start </button>
-            </div>
-            <div class="directions">
-                <button> up </button>
-                <div style="display: flex;">
-                    <button> left </button>
-                    <button> down </button>
-                    <button> right </button>
-                </div>
+            <div class="restart">
+                <button onclick="restart()"> restart </button>
             </div>
         </div>
     </div>
 </body>
+<script src="./js/Classes/gameBoard.js"></script>
+<script src="./js/Classes/snake.js"></script>
 <script src="./js/snakeGame.js"></script>
 
 </html>
