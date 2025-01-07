@@ -1,11 +1,24 @@
 let isPaused = false;
 
+const loadQTable = async () => {
+    try {
+        const response = await fetch("./QTable.json"); 
+        if (!response.ok) {
+            throw new Error("Failed to load QTable.json");
+        }
+        const qTable = await response.json();
+        return qTable;
+    } catch (error) {
+        console.error("Error loading QTable.json:", error);
+    }
+};
+
 const snakeGame = async () => {
     const { AI } = await import("./AI.js")
     const gameBoard = document.getElementById("gameBoard");
     const ctx = gameBoard.getContext("2d")
-    const qTable = await import("./QTable.json")
- 
+    const qTable = await loadQTable()
+
     const gameBoardWidth = gameBoard.offsetWidth;
     const gameBoardHeight = gameBoard.offsetHeight;
     const tileSize = 10;
