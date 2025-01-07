@@ -8,7 +8,7 @@ const loadQTable = async () => {
             const response = await import("../public/QTable.json");
             data = response;
         } else {
-            const response = await fetch('/QTable.json');
+            const response = await fetch('/QTable');
             if (!response.ok) {
                 throw new Error("Failed to load QTable.json");
             }
