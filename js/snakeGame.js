@@ -1,7 +1,7 @@
 let isPaused = false;
 
 const snakeGame = async () => {
-    const { AI } = await import("./AI")
+    const { AI } = await import("./AI.js")
     const gameBoard = document.getElementById("gameBoard");
     const ctx = gameBoard.getContext("2d")
     const qTable = await import("./QTable.json")
