@@ -2,12 +2,23 @@ let isPaused = false;
 
 const loadQTable = async () => {
     try {
-        const response = await fetch("./QTable.json"); 
-        if (!response.ok) {
-            throw new Error("Failed to load QTable.json");
+        let data;
+
+        if (window.location.hostname === 'localhost') {
+            const response = await import("../public/QTable.json");
+            data = response;
+        } else {
+            const response = await fetch('/QTable.json');
+            if (!response.ok) {
+                throw new Error("Failed to load QTable.json");
+            }
+            data = await response.json();
         }
-        const qTable = await response.json();
-        return qTable;
+
+        console.log(data);
+
+        return data;
+
     } catch (error) {
         console.error("Error loading QTable.json:", error);
     }
