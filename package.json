@@ -1,0 +1,15 @@
+{
+  "name": "snakegame",
+  "version": "1.0.0",
+  "description": "snake game",
+  "source": "index.html",
+  "scripts": {
+    "start": "parcel",
+    "build": "parcel build"
+  },
+  "author": "Ainamalala Lucky",
+  "license": "ISC",
+  "devDependencies": {
+    "parcel": "^2.13.3"
+  }
+}

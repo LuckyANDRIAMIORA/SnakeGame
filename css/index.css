@@ -18,21 +18,3 @@ html {
     align-items: center;
     min-height: 100vh;
 }
-
-.restart {
-    display: flex;
-    margin: 5px;
-    justify-content: center;
-    align-items: center;
-    margin-left: 2px;
-    margin-right: 2px;
-    flex: 1;
-}
-
-.controler {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    flex: 1;
-}

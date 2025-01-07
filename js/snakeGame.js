@@ -1,127 +1,84 @@
-const board = document.getElementById('gameBoard');
-const boardSize = 1600;
-const gameBoard = new GameBoard(board, boardSize)
+let isPaused = false;
 
-let snake
+const snakeGame = async () => {
+    const { AI } = await import("./AI")
+    const gameBoard = document.getElementById("gameBoard");
+    const ctx = gameBoard.getContext("2d")
+    const qTable = await import("./QTable.json")
+ 
+    const gameBoardWidth = gameBoard.offsetWidth;
+    const gameBoardHeight = gameBoard.offsetHeight;
+    const tileSize = 10;
+    const rows = gameBoardWidth / tileSize;
+    const cols = gameBoardHeight / tileSize;
 
-let snakeMotion = null
-let direction = 1;
-let lastTime = 0;
-const speed = 50;
+    let snakeInstance = [{ x: 1, y: 0 }, { x: 0, y: 0 }];
+    let foodInstance = AI.generateFoodPosition(cols, rows, snakeInstance);
+    AI.initQTable(qTable);
 
-function initSnake() {
-    for (let index = 0; index < snake.bodyLength(); index++) {
-        gameBoard.drawSnakePart(snake.getIndex(index));
+    const getUpdate = () => {
+        const { newSnake, newFood } = AI.qFunction(snakeInstance, foodInstance, cols, rows);
+        foodInstance = Object.assign({}, newFood);
+        snakeInstance = newSnake.map(obj => ({ ...obj }));
     }
-}
 
-function killSnake() {
-    if (snake.getIndex(0) >= gameBoard.getCellsLength() || snake.getIndex(0) < 0) {
-        throw new Error('Game Over!')
-    }
-    if (snake.biteItself()) {
-        throw new Error('Game Over!')
-    }
-}
+    const draw = () => {
 
-function moveSnake(timestamp) {
-    try {
-        if (!lastTime) lastTime = timestamp;
-        const deltaTime = timestamp - lastTime;
-        if (deltaTime > speed) {
-            killSnake()
-            const hasEaten = foodEaten()
-            if (!hasEaten) {
-                gameBoard.erraseSnakePart(snake.getIndex(snake.bodyLength() - 1));
-                snake.removeSnakeTail();
-            }
-            const newHead = snake.getIndex(0) + direction;
-            snake.addNewSnakeHead(newHead);
-            gameBoard.drawSnakePart(snake.getIndex(0))
-            lastTime = timestamp;
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, gameBoardWidth, gameBoardHeight);
+
+        ctx.fillStyle = "pink";
+        snakeInstance.forEach(segment => {
+            ctx.fillRect(segment.x * tileSize, segment.y * tileSize, tileSize, tileSize);
+        });
+
+        ctx.fillStyle = "red";
+        ctx.fillRect(foodInstance.x * tileSize, foodInstance.y * tileSize, tileSize, tileSize);
+    }
+
+    function gameLoop() {
+        if (!isPaused) {
+            getUpdate();
+            draw();
         }
-        requestAnimationFrame(moveSnake)
-    } catch (error) {
-        stop()
-        console.log('Game Over')
+        setTimeout(() => requestAnimationFrame(gameLoop), 100);
     }
 
+    gameLoop();
 }
 
-function foodEaten() {
-    if (gameBoard.getFoodIndex(snake.getIndex(0)) != -1) {
-        let index = gameBoard.getFoodIndex(snake.getIndex(0))
-        gameBoard.erraseFood(snake.getIndex(0))
-        gameBoard.removeFood(index);
-        gameBoard.generateFood()
-        return true
-    } else {
-        return false
+function togglePause() {
+    isPaused = !isPaused;
+}
+
+function downloadQTableJSON() {
+    if (localStorage.hasOwnProperty("QTable")) {
+
+        const jsonString = localStorage.getItem("QTable");
+
+        const blob = new Blob([jsonString], { type: 'application/json' });
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = "QTable";
+
+        link.click();
+
+        URL.revokeObjectURL(link.href);
+
     }
 }
 
-function generateFood() {
-    gameBoard.generateFood()
-}
-
-async function initGame() {
-    gameBoard.initGameBoard()
-    snake = new Snake(0, 1)
-    initSnake()
-    generateFood()
-
-    snakeMotion = requestAnimationFrame(moveSnake,)
-}
-
-function restart() {
-    stop();
-
-    direction = 1
-    for (let index = 0; index < snake.bodyLength(); index++) {
-        gameBoard.erraseSnakePart(snake.getIndex(index))
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'p') { // Press 'p' to toggle pause
+        togglePause();
     }
-    gameBoard.removeAllFood()
-    snake = new Snake(0, 1)
-    initSnake()
-    generateFood()
-    snakeMotion = requestAnimationFrame(moveSnake,)
+});
 
-}
-
-async function stop() {
-    cancelAnimationFrame(snakeMotion)
-}
-
-function goDown() {
-    direction = 40
-}
-
-function goUp() {
-    direction = -40
-}
-
-function goLeft() {
-    direction = -1
-}
-
-function goRight() {
-    direction = 1
-}
-
-document.addEventListener('keyup', (e) => {
-
-    if (e.key === 'ArrowDown' && direction != -40) {
-        goDown()
+document.addEventListener('keydown', (event) => {
+    if (event.key === 's') { // Press 'p' to toggle pause
+        downloadQTableJSON();
     }
-    if (e.key === 'ArrowUp' && direction != 40) {
-        goUp()
-    }
-    if (e.key === 'ArrowRight' && direction != -1) {
-        goRight()
-    }
-    if (e.key === 'ArrowLeft' && direction != 1) {
-        goLeft()
-    }
-})
+});
 
-initGame()
+snakeGame();
