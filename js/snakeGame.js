@@ -1,34 +1,11 @@
 let isPaused = false;
+import {qTable} from "./QTable.js"
+import {AI}  from "./AI.js"
 
-const loadQTable = async () => {
-    try {
-        let data;
-
-        if (window.location.hostname === 'localhost') {
-            const response = await import("../public/QTable.json");
-            data = response;
-        } else {
-            const response = await fetch('/QTable');
-            if (!response.ok) {
-                throw new Error("Failed to load QTable.json");
-            }
-            data = await response.json();
-        }
-
-        console.log(data);
-
-        return data;
-
-    } catch (error) {
-        console.error("Error loading QTable.json:", error);
-    }
-};
 
 const snakeGame = async () => {
-    const { AI } = await import("./AI.js")
     const gameBoard = document.getElementById("gameBoard");
     const ctx = gameBoard.getContext("2d")
-    const qTable = await loadQTable()
 
     const gameBoardWidth = gameBoard.offsetWidth;
     const gameBoardHeight = gameBoard.offsetHeight;
@@ -75,21 +52,22 @@ function togglePause() {
     isPaused = !isPaused;
 }
 
-function downloadQTableJSON() {
+function downloadQTableJS() {
     if (localStorage.hasOwnProperty("QTable")) {
 
         const jsonString = localStorage.getItem("QTable");
 
-        const blob = new Blob([jsonString], { type: 'application/json' });
+        const jsContent = `export const qTable = ${jsonString};`;
+
+        const blob = new Blob([jsContent], { type: 'application/javascript' });
 
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = "QTable";
+        link.download = "QTable.js";
 
         link.click();
 
         URL.revokeObjectURL(link.href);
-
     }
 }
 
@@ -101,7 +79,7 @@ document.addEventListener('keydown', (event) => {
 
 document.addEventListener('keydown', (event) => {
     if (event.key === 's') { // Press 'p' to toggle pause
-        downloadQTableJSON();
+        downloadQTableJS();
     }
 });
 
